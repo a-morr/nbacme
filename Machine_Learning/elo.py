@@ -37,3 +37,4 @@ def update_elo_ratings(ra, rb, a_score, b_score):
     ra += k * (a_score - ea)
     rb += k * (b_score - eb)
 
+    return ra, rb
