@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 from urllib2 import urlopen
 from datetime import datetime, timedelta
+import pandas as pd
 import csv
 
 stem = 'http://www.basketball-reference.com/leagues/NBA_'
@@ -17,11 +18,36 @@ soup = BeautifulSoup(urlopen(url),'html.parser')
 rows = soup.find('table', id='schedule').find_all('tr')
 games = [[entry.text for entry in row.find_all(['td','th'])[:-3]] for row in rows]
 today = []
+header = games[0]
+header[5] = 'PTS.1'
 
 for game in games:
 	if game[0] == datestring:
 		today.append(game)
 
-with open('live_season.csv', 'a') as outfile:
-	out = csv.writer(outfile)
-	out.writerows(games)
+recent = pd.DataFrame(today, columns=header)
+
+# Make it look like historical data
+recent['fran_id'] = recent['Visitor/Neutral'].str.split().str[-1]
+recent['opp_fran'] = recent['Home/Neutral'].str.split().str[-1]
+fn = {'76ers':'Sixers', 'Blazers':'Trailblazers'}
+recent['fran_id'].replace(fn, inplace=True)
+recent['opp_fran'].replace(fn, inplace=True)
+recent['pts'] = recent['PTS']
+recent['opp_pts'] = recent['PTS.1']
+recent['game_location'] = 'A'
+
+# Parse dates
+recent['day'] = recent['Date'].str.split().str[2].str[:-1]
+recent['month'] = recent['Date'].str.split().str[1]
+recent['year'] = recent['Date'].str.split().str[-1]
+months = {'Jan' : 1,'Feb' : 2,'Mar' : 3,'Apr' : 4,'May' : 5,'Jun' : 6,'Jul' : 7,'Aug' : 8,'Sep' : 9,'Oct' : 10,'Nov' : 11,'Dec' : 12}
+recent['month'].replace(months,inplace=True)
+recent = recent[['fran_id','pts','opp_fran','opp_pts','game_location','month','day','year']]
+try:
+	old = pd.read_csv('../data/current_season.csv')
+	new = pd.concat([old,recent])
+	new.to_csv('../data/current_season.csv')
+except IOError:
+	print 'File not found: making new file'
+	recent.to_csv('../data/current_season.csv',index=None)
