@@ -38,3 +38,17 @@ def update_elo_ratings(ra, rb, a_score, b_score):
     rb += k * (b_score - eb)
 
     return ra, rb
+
+
+def train(data):
+    """
+    """
+    # Initialize score
+    teams = np.unique(data['fran_id'])
+    team_elo = dict(zip(teams,[1500]*len(teams)))
+    for i in range(len(data)):
+        row = data.iloc[i]
+        RA = team_elo[row['fran_id']]
+        RB = team_elo[row['opp_fran']]
+        team_elo[row['fran_id']], team_elo[row['opp_fran']] = update_elo_ratings(RA,RB,row['pts']>row['opp_pts'],row['pts']<row['opp_pts'])
+    return team_elo
