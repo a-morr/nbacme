@@ -108,4 +108,54 @@ class Kristaps(object):
         table.to_csv('../data/tomorrow.csv', index=None)
 
         return table
+            
+    def current_WL(self,filename='../data/historical_data.csv',parse_dates=True):
+        data = pd.read_csv(filename)
+        data['date'] = pd.to_datetime(data['date'])
+        teams = np.unique(data['fran_id'])
+        team_WL = {}
+        data['Won'] = (data['pts'] > data['opp_pts'])
+        for team in teams:
+            won = data[(data['fran_id'] == team) & (data['date'] >=dt.datetime(2016,9,1))]['Won'].sum()
+            won += (data[(data['opp_fran'] == team) & (data['date'] >=dt.datetime(2016,9,1))]['Won'] == False).sum()
+            lost = (data[(data['fran_id'] == team) & (data['date'] >=dt.datetime(2016,9,1))]['Won']==False).sum()
+            lost += (data[(data['opp_fran'] == team) & (data['date'] >=dt.datetime(2016,9,1))]['Won']==True).sum()
+            team_WL[team] = [won,lost]
+        return team_WL
+        
+    def simulate_seasons(self,filename='../data/upcoming_games.csv', n=100):
+        future_games = pd.read_csv(filename)
+        teams = np.unique(future_games['fran_id'])
+        team_WL_Predicted = dict(zip(teams, np.zeros((len(teams),2))))
+        for it in range(n):
+            for i in range(len(future_games)):
+                game = future_games.iloc[i]
+                A = game['fran_id']
+                B = game['opp_fran']
+            
+                rA = self.elo_dict[A]
+                rB = self.elo_dict[B]
+            
+                pA, pB = elo.predict_score(rA, rB)
+                winner = np.random.choice([A, B], p=[pA, pB])
+            
+                A_score = 1 if winner == A else 0
+                B_score = 1 - A_score
+                team_WL_Predicted[A][0] += A_score
+                team_WL_Predicted[A][1] += B_score
+            
+                team_WL_Predicted[B][0] += B_score
+                team_WL_Predicted[B][1] += A_score
+            
+        for team in teams:
+            team_WL_Predicted[team] = np.round(team_WL_Predicted[team]/float(n))
+        team_WL = self.current_WL()
+        total_WL = {}
+        for team in teams:
+            total_WL[team] = team_WL_Predicted[team]+team_WL[team]
+        Projected_WL = pd.DataFrame({'fran_id':teams,'Projected W':[total_WL[team][0] for team in teams],'Projected L':[total_WL[team][1] for team in teams],'elo':[self.elo_dict[team] for team in teams]})
+        table = Projected_WL.sort_values('elo',ascending=False)
+        table.to_csv('../data/ProjectedWL.csv',index = False)
+        return table
+
 
