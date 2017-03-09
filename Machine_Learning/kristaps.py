@@ -94,7 +94,7 @@ class Kristaps(object):
         """
         df = pd.read_csv(filename)
         today = dt.datetime.today()
-        df = df[(df['month'] == today.month) & (df['day'] == today.day) & (df['year'] == today.year)]
+        df = df[(df['date'] == str(today.date()))]
 
         preds = []
         for i in range(len(df)):
@@ -110,20 +110,32 @@ class Kristaps(object):
         return table
             
     def current_WL(self,filename='../data/historical_data.csv',parse_dates=True):
+        """
+
+        :param filename:
+        :param parse_dates:
+        :return:
+        """
         data = pd.read_csv(filename)
         data['date'] = pd.to_datetime(data['date'])
         teams = np.unique(data['fran_id'])
         team_WL = {}
         data['Won'] = (data['pts'] > data['opp_pts'])
         for team in teams:
-            won = data[(data['fran_id'] == team) & (data['date'] >=dt.datetime(2016,9,1))]['Won'].sum()
-            won += (data[(data['opp_fran'] == team) & (data['date'] >=dt.datetime(2016,9,1))]['Won'] == False).sum()
-            lost = (data[(data['fran_id'] == team) & (data['date'] >=dt.datetime(2016,9,1))]['Won']==False).sum()
-            lost += (data[(data['opp_fran'] == team) & (data['date'] >=dt.datetime(2016,9,1))]['Won']==True).sum()
-            team_WL[team] = [won,lost]
+            won = data[(data['fran_id'] == team) & (data['date'] >= dt.datetime(2016, 9, 1))]['Won'].sum()
+            won += (data[(data['opp_fran'] == team) & (data['date'] >= dt.datetime(2016, 9, 1))]['Won'] == False).sum()
+            lost = (data[(data['fran_id'] == team) & (data['date'] >= dt.datetime(2016, 9, 1))]['Won'] == False).sum()
+            lost += (data[(data['opp_fran'] == team) & (data['date'] >= dt.datetime(2016, 9, 1))]['Won'] == True).sum()
+            team_WL[team] = [won, lost]
         return team_WL
         
     def simulate_seasons(self,filename='../data/upcoming_games.csv', n=100):
+        """
+
+        :param filename:
+        :param n:
+        :return:
+        """
         future_games = pd.read_csv(filename)
         teams = np.unique(future_games['fran_id'])
         team_WL_Predicted = dict(zip(teams, np.zeros((len(teams),2))))
