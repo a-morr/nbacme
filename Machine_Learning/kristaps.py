@@ -22,7 +22,7 @@ class Kristaps(object):
         if init:
             teams = np.unique(data['fran_id'])
             self.elo_dict = dict(zip(teams, [1500] * len(teams)))
-
+        data.sort_values('date',inplace=True)
         for i in range(len(data)):
             row = data.iloc[i]
             RA = self.elo_dict[row['fran_id']]
