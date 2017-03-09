@@ -105,6 +105,8 @@ class Kristaps(object):
             preds.append([df.iloc[i]['fran_id'], df.iloc[i]['opp_fran'], sc[0], sc[1]])
 
         table = pd.DataFrame(preds, columns=['fran_id', 'opp_fran', 'prob', 'opp_prob'])
+        table[['opp_prob']] = np.rint(table[['opp_prob']] * 100).astype(np.int32)
+        table[['prob']] = np.rint(table[['prob']] * 100).astype(np.int32)
         table.to_csv('../data/tomorrow.csv', index=None)
 
         return table
