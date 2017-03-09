@@ -1,5 +1,5 @@
 # main.py
-from Machine_Learning import Kristaps
+from Machine_Learning import kristaps
 from Scraping import scrape_538, daily
 # Scraping function
 daily.daily_nba_ref()
