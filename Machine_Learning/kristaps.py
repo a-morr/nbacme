@@ -13,10 +13,12 @@ class Kristaps(object):
 
 
     def train(self, data, init=True):
-        """
+        """ Calculates the current Elo rating for each of the teams.
 
-        :param data:
-        :return:
+        :param data:    Pandas dataframe with each row being a game.  Columns include 'fran_id',
+                        'opp_fran', 'pts', and 'opp_pts'
+        :return:        Update the self.elo_dict where the team names are the keys and the elo
+                        ratings are the values.
         """
         # Initialize score
         if init:
@@ -109,12 +111,12 @@ class Kristaps(object):
 
         return table
             
-    def current_WL(self,filename='../data/historical_data.csv',parse_dates=True):
-        """
+    def current_WL(self,filename='../data/historical_data.csv'):
+        """ Count the current number of wins and losses for all teams in the 2016-2017 season.
+            Returns a dictionary with the team names as the keys and [wins,losses] as the values.
 
-        :param filename:
-        :param parse_dates:
-        :return:
+        :param filename:    Input file with games of the current season.  Defaults to 'historical_data.csv'
+        :return:            A dictionary with team names as the keys and a list [wins,losses] as the values.
         """
         data = pd.read_csv(filename)
         data['date'] = pd.to_datetime(data['date'])
@@ -130,11 +132,14 @@ class Kristaps(object):
         return team_WL
         
     def simulate_seasons(self,filename='../data/upcoming_games.csv', n=100):
-        """
+        """ This simulates the rest of 2016-2017 season n times.  This function assumes
+            that train has been run as it uses self.elo_dict.  Elo scores are not updated
+            during the simulated season.  This will also calculate the current wins and 
+            losses through current_WL().  A pandas dataframe will be saved and returned.
 
-        :param filename:
-        :param n:
-        :return:
+        :param filename:    Input file with future games.  Defaults to 'upcoming_games.csv'
+        :param n:           Number of times the 2016-2017 season will be simulated.  Defaults to 100
+        :return:            Pandas dataframe with columns as Team name, Projected Wins, Projected Losses, and Elo rating
         """
         future_games = pd.read_csv(filename)
         teams = np.unique(future_games['fran_id'])
