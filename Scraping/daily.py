@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import pandas as pd
 import csv
 
-def daily_nba_ref():
+def daily_nba_ref(dry_run=False):
     """
     Scrapes daily from the basketball reference website for game results.
     Formats them and adds them to the current season csv.
@@ -50,7 +50,10 @@ def daily_nba_ref():
     recent['month'].replace(months,inplace=True)
     recent['date'] = pd.to_datetime(recent.year*10000+recent.month*100+recent.day,format='%Y%m%d')
     recent = recent[['fran_id','pts','opp_fran','opp_pts','game_location','date']]
-    recent.to_csv('../data/historical_data.csv', mode='a', header=False, index=None)
+    if not dry_run:
+        recent.to_csv('../data/historical_data.csv', mode='a', header=False, index=None)
+    else:
+        print recent
 
 if __name__=='__main__':
-    daily_nba_ref()
+    daily_nba_ref(dry_run=True)
