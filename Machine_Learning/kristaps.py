@@ -218,7 +218,7 @@ class Kristaps(object):
 
         :return:
         """
-        us = pd.read_csv('../data/tomorrow.csv')
+        us = pd.read_csv('../data/today_predictions.csv')
         five38 = pd.read_csv('../data/pred_538.csv')
         del five38['date']
         del five38['fran_city']
