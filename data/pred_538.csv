@@ -1,8 +1,9 @@
-ORL,24,CHA,76,-7.0,2017-03-10
-GS,66,MIN,34,4.0,2017-03-10
-HOU,56,CHI,44,1.5,2017-03-10
-IND,38,MIL,62,-3.0,2017-03-10
-TOR,49,ATL,51,0,2017-03-10
-BKN,15,DAL,85,-10.5,2017-03-10
-BOS,47,DEN,53,-1.0,2017-03-10
-WSH,65,SAC,35,4.0,2017-03-10
+fran,fran_city,prob,opp,opp_city,opp_prob,sprd,date
+Magic,ORL,24,Hornets,CHA,76,-7.0,2017-03-10
+Warriors,GS,66,Timberwolves,MIN,34,4.0,2017-03-10
+Rockets,HOU,56,Bulls,CHI,44,1.5,2017-03-10
+Pacers,IND,38,Bucks,MIL,62,-3.0,2017-03-10
+Raptors,TOR,49,Hawks,ATL,51,0,2017-03-10
+Nets,BKN,15,Mavericks,DAL,85,-10.5,2017-03-10
+Celtics,BOS,47,Nuggets,DEN,53,-1.0,2017-03-10
+Wizards,WSH,65,Kings,SAC,35,4.0,2017-03-10
