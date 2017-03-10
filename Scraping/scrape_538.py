@@ -45,7 +45,7 @@ def get_daily_predictions():
     together = [away_teams, away_probabilities, home_teams, home_probabilities, home_spread, todays]
     together = np.array(together).T
 
-    with open('pred_538.csv', 'a') as outcsv:
+    with open('../data/pred_538.csv', 'a') as outcsv:
         writer = csv.writer(outcsv)
         for row in together:
             if row[0] != 'X':
