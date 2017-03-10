@@ -118,7 +118,7 @@ class Kristaps(object):
 
     def predict_today(self, filename='../data/upcoming_games.csv', write=1):
         """  Predict today's games, as pulled from the upcoming_games file.
-             Saves predictions to csv as today.csv for use on website.
+             Saves predictions to csv as today_predictions.csv for use on website.
 
         :param filename:    Input file with future games.  Defaults to 'upcoming_games.csv'
         :return:            A pandas dataframe containing the probability of each team winning each game
@@ -142,7 +142,7 @@ class Kristaps(object):
         table[['opp_prob']] = np.rint(table[['opp_prob']] * 100).astype(np.int32)
         table[['prob']] = np.rint(table[['prob']] * 100).astype(np.int32)
         if write == 1:
-            table.to_csv('../data/today.csv', index=None)
+            table.to_csv('../data/today_predictions.csv', index=None)
 
         return table
 
@@ -212,4 +212,23 @@ class Kristaps(object):
         table.to_csv('../data/ProjectedWL.csv',index = False)
         return table
 
+    def compare_to_538(self):
+        """ Create chart showing our predictions and 538's predictions side by side.
+            Shows predictions from scrape_538() and from predict_today()
 
+        :return:
+        """
+        us = pd.read_csv('../data/tomorrow.csv')
+        five38 = pd.read_csv('../data/pred_538.csv')
+        del five38['date']
+        del five38['fran_city']
+        del five38['opp_city']
+        five38.sort_values('fran', inplace=True)
+        us.sort_values('fran_id', inplace=True)
+        five38.index = us.index
+        newd = pd.concat([us, five38], axis=1, join_axes=[us.index])
+        del newd['fran']
+        del newd['opp']
+        newd.columns = ['fran_id', 'opp_fran', 'Our prob', 'Our opp prob', '538 prob', '538 opp prob', '538 spread']
+
+        return newd
