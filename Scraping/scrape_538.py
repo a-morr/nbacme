@@ -82,7 +82,7 @@ def get_daily_predictions():
 
     with open('../data/pred_538.csv', 'a') as outcsv:
         writer = csv.writer(outcsv)
-        writer.writerow(['fran', 'fran_city', 'pts', 'opp', 'opp_city', 'opp_pts', 'sprd', 'date'])
+        writer.writerow(['fran', 'fran_city', 'prob', 'opp', 'opp_city', 'opp_prob', 'sprd', 'date'])
         for row in together:
             if row[0] != 'X':
                 writer.writerow(row)
