@@ -3,6 +3,40 @@ from bs4 import BeautifulSoup
 import requests
 import numpy as np
 
+team_cities = { 'Bucks':'MIL',
+                'Bulls':'CHI',
+                'Cavaliers':'CLE',
+                'Celtics':'BOS',
+                'Clippers':'LAC',
+                'Grizzlies':'MEM',
+                'Hawks':'ATL',
+                'Heat':'MIA',
+                'Hornets':'CHA',
+                'Jazz':'UTA',
+                'Kings':'SAC',
+                'Knicks':'NY',
+                'Lakers':'LAL',
+                'Magic':'ORL',
+                'Mavericks':'DAL',
+                'Nets':'BKN',
+                'Nuggets':'DEN',
+                'Pacers':'IND',
+                'Pelicans':'NO',
+                'Pistons':'DET',
+                'Raptors':'TOR',
+                'Rockets':'HOU',
+                'Sixers':'PHI',
+                'Spurs':'SA',
+                'Suns':'PHX',
+                'Thunder':'OKC',
+                'Timberwolves':'MIN',
+                'Trailblazers':'POR',
+                'Warriors':'GS',
+                'Wizards':'WSH',
+                'X':'X',
+                }
+
+city_teams = dict(zip(team_cities.values(), team_cities.keys()))
 
 def get_daily_predictions():
     """
@@ -42,12 +76,13 @@ def get_daily_predictions():
         elif home_spread[i] != 0:
             away_spread[i] = -home_spread[i]
 
-    together = [away_teams, away_probabilities, home_teams, home_probabilities, home_spread, todays]
+    together = [[city_teams[x] for x in away_teams], away_teams, away_probabilities,
+                [city_teams[x] for x in home_teams], home_teams, home_probabilities, home_spread, todays]
     together = np.array(together).T
 
     with open('../data/pred_538.csv', 'a') as outcsv:
         writer = csv.writer(outcsv)
-        writer.writerow(['fran', 'pts', 'opp', 'opp_pts', 'sprd', 'date'])
+        writer.writerow(['fran', 'fran_city', 'pts', 'opp', 'opp_city', 'opp_pts', 'sprd', 'date'])
         for row in together:
             if row[0] != 'X':
                 writer.writerow(row)
