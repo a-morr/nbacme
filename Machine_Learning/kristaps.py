@@ -2,17 +2,23 @@ import elo
 import numpy as np
 import pandas as pd
 import datetime as dt
+import pickle
 
 class Kristaps(object):
     """
 
     """
 
-    def __init__(self):
-        self.elo_dict = dict()
+    def __init__(self, elo_dict_file=None):
+        if elo_dict_file is not None:
+            self.elo_dict = pickle.load(open('elo_dict.p', 'rb'))
+            self.init = True
+        else:
+            self.init = False
+            self.elo_dict = dict()
 
 
-    def train(self, data, init=True):
+    def train_all(self, data, write=1):
         """ Calculates the current Elo rating for each of the teams.
 
         :param data:    Pandas dataframe with each row being a game.  Columns include 'fran_id',
@@ -21,24 +27,47 @@ class Kristaps(object):
                         ratings are the values.
         """
         # Initialize score
-        if init:
+        if not self.init:
             teams = np.unique(data['fran_id'])
             self.elo_dict = dict(zip(teams, [1500] * len(teams)))
-        data.sort_values('date',inplace=True)
+
+        data.sort_values('date', inplace=True)
         for i in range(len(data)):
             row = data.iloc[i]
             RA = self.elo_dict[row['fran_id']]
             RB = self.elo_dict[row['opp_fran']]
             self.elo_dict[row['fran_id']], self.elo_dict[row['opp_fran']] = elo.update_elo_ratings(RA, RB, row['pts'] > row['opp_pts'],
                                                                                      row['pts'] < row['opp_pts'])
+        if write == 1:
+            pickle.dump(self.elo_dict, open('elo_dict.p', 'wb'))
+
+
+    def train_yesterday(self, filename='../data/historical_data.csv', write=1):
+        """  Updates elo ratings based on results of yesterday's games.
+
+        :param filename:
+        :return:
+        """
+
+        df = pd.read_csv(filename)
+        yesterday = dt.datetime.today() - dt.timedelta(days=1)
+        df = df[(df['date'] == str(yesterday.date()))]
+        for i in range(len(df)):
+            row = df.iloc[i]
+            r_fran = self.elo_dict[row['fran_id']]
+            r_opp = self.elo_dict[row['opp_fran']]
+            self.elo_dict[row['fran_id']], self.elo_dict[row['opp_fran']] = elo.update_elo_ratings(r_fran, r_opp, row['pts'] > row['opp_pts'], row['pts'] < row['opp_pts'])
+
+        if write == 1:
+            pickle.dump(self.elo_dict, open('elo_dict.p', 'wb'))
 
 
     def simulate_games(self, future_games, n):
-        """
+        """ Predict outcomes of future games.  Average of n runs.
 
-        :param future_games:
-        :param n:
-        :return:
+        :param future_games:    Data frame
+        :param n:               int
+        :return:                Two lists
         """
 
         game_scores = np.zeros(len(future_games))
@@ -87,13 +116,16 @@ class Kristaps(object):
         return correct / len(Aprobs)
 
 
-    def predict_today(self, filename='../data/upcoming_games.csv'):
+    def predict_today(self, filename='../data/upcoming_games.csv', write=1):
         """  Predict today's games, as pulled from the upcoming_games file.
-             Saves predictions to csv as tomorrow.csv for use on website.
+             Saves predictions to csv as today.csv for use on website.
 
         :param filename:    Input file with future games.  Defaults to 'upcoming_games.csv'
         :return:            A pandas dataframe containing the probability of each team winning each game
         """
+
+        # TODO Append each day's predictions to the same file?  Or store in unique file names?
+
         df = pd.read_csv(filename)
         today = dt.datetime.today()
         df = df[(df['date'] == str(today.date()))]
@@ -109,11 +141,14 @@ class Kristaps(object):
         table = pd.DataFrame(preds, columns=['fran_id', 'opp_fran', 'prob', 'opp_prob'])
         table[['opp_prob']] = np.rint(table[['opp_prob']] * 100).astype(np.int32)
         table[['prob']] = np.rint(table[['prob']] * 100).astype(np.int32)
-        table.to_csv('../data/tomorrow.csv', index=None)
+        if write == 1:
+            table.to_csv('../data/today.csv', index=None)
 
         return table
+
+
             
-    def current_WL(self,filename='../data/historical_data.csv'):
+    def current_WL(self, filename='../data/historical_data.csv'):
         """ Count the current number of wins and losses for all teams in the 2016-2017 season.
             Returns a dictionary with the team names as the keys and [wins,losses] as the values.
 
@@ -133,7 +168,7 @@ class Kristaps(object):
             team_WL[team] = [won, lost]
         return team_WL
         
-    def simulate_seasons(self,filename='../data/upcoming_games.csv', n=100):
+    def simulate_seasons(self, filename='../data/upcoming_games.csv', n=100):
         """ This simulates the rest of 2016-2017 season n times.  This function assumes
             that train has been run as it uses self.elo_dict.  Elo scores are not updated
             during the simulated season.  This will also calculate the current wins and 
