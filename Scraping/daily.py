@@ -43,19 +43,14 @@ def daily_nba_ref():
     recent['game_location'] = 'A'
 
     # Parse dates
-    recent['day'] = recent['Date'].str.split().str[2].str[:-1]
+    recent['day'] = recent['Date'].str.split().str[2].str[:-1].map(int)
     recent['month'] = recent['Date'].str.split().str[1]
-    recent['year'] = recent['Date'].str.split().str[-1]
+    recent['year'] = recent['Date'].str.split().str[-1].map(int)
     months = {'Jan' : 1,'Feb' : 2,'Mar' : 3,'Apr' : 4,'May' : 5,'Jun' : 6,'Jul' : 7,'Aug' : 8,'Sep' : 9,'Oct' : 10,'Nov' : 11,'Dec' : 12}
     recent['month'].replace(months,inplace=True)
-    recent = recent[['fran_id','pts','opp_fran','opp_pts','game_location','month','day','year']]
-    try:
-        old = pd.read_csv('../data/current_season.csv')
-        new = pd.concat([old,recent])
-        new.to_csv('../data/current_season.csv')
-    except IOError:
-        print 'File not found: making new file'
-        recent.to_csv('../data/current_season.csv',index=None)
+    recent['date'] = pd.to_datetime(recent.year*10000+recent.month*100+recent.day,format='%Y%m%d')
+    recent = recent[['fran_id','pts','opp_fran','opp_pts','game_location','date']]
+    recent.to_csv('../data/historical_data.csv', mode='a', header=False, index=None)
 
 if __name__=='__main__':
     daily_nba_ref()
