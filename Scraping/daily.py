@@ -1,36 +1,36 @@
 from bs4 import BeautifulSoup
 from urllib2 import urlopen
-from datetime import datetime, timedelta
+from datetime import datetime
+import time, csv
 import pandas as pd
-import csv
 
-def daily_nba_ref(dry_run=False):
+def daily_nba_ref():
     """
     Scrapes daily from the basketball reference website for game results.
     Formats them and adds them to the current season csv.
     """
     stem = 'http://www.basketball-reference.com/leagues/NBA_'
+    year = 2017
+    months = ['october','november','december','january','february','march','april','may','june']
 
-    now = datetime.now()
-    yesterday = now - timedelta(days=1)
-    month = yesterday.month
-    year = yesterday.year + month // 10
+    with open('data/current_raw.csv','w') as outfile:
+        out = csv.writer(outfile)
+        for month in months:
+            try:
+                url = stem+str(year)+'_games-'+month+'.html'
+                soup = BeautifulSoup(urlopen(url),'html.parser')
+            except:
+                continue
+            rows = soup.find('table', id='schedule').find_all('tr')
+            games = [[entry.text for entry in row.find_all(['td','th'])[:-3]] for row in rows]
+            out.writerows(games)
+            print year, month
+            time.sleep(3)
 
-    strmonth = yesterday.strftime('%B').lower()
-    datestring = yesterday.strftime('%a, %b %-d, %Y')
-    url = stem+str(year)+'_games-'+strmonth+'.html'
-    soup = BeautifulSoup(urlopen(url),'html.parser')
-    rows = soup.find('table', id='schedule').find_all('tr')
-    games = [[entry.text for entry in row.find_all(['td','th'])[:-3]] for row in rows]
-    today = []
-    header = games[0]
-    header[5] = 'PTS.1'
-
-    for game in games:
-        if game[0] == datestring:
-            today.append(game)
-
-    recent = pd.DataFrame(today, columns=header)
+def split_current():
+    ## Future games pull out
+    recent = pd.read_csv('data/current_raw.csv')
+    recent = recent[recent['Date'] != 'Date']
 
     # Make it look like historical data
     recent['fran_id'] = recent['Visitor/Neutral'].str.split().str[-1]
@@ -43,17 +43,29 @@ def daily_nba_ref(dry_run=False):
     recent['game_location'] = 'A'
 
     # Parse dates
-    recent['day'] = recent['Date'].str.split().str[2].str[:-1].map(int)
+    recent['day'] = recent['Date'].str.split().str[2].str[:-1].astype(int)
     recent['month'] = recent['Date'].str.split().str[1]
-    recent['year'] = recent['Date'].str.split().str[-1].map(int)
+    recent['year'] = recent['Date'].str.split().str[-1].astype(int)
     months = {'Jan' : 1,'Feb' : 2,'Mar' : 3,'Apr' : 4,'May' : 5,'Jun' : 6,'Jul' : 7,'Aug' : 8,'Sep' : 9,'Oct' : 10,'Nov' : 11,'Dec' : 12}
-    recent['month'].replace(months,inplace=True)
+    recent['month'] = recent['month'].replace(months).astype(int)
     recent['date'] = pd.to_datetime(recent.year*10000+recent.month*100+recent.day,format='%Y%m%d')
     recent = recent[['fran_id','pts','opp_fran','opp_pts','game_location','date']]
-    if not dry_run:
-        recent.to_csv('../data/historical_data.csv', mode='a', header=False, index=None)
-    else:
-        print recent
+
+
+    upcoming = recent[recent['pts'] != recent['pts']]
+    upcoming.to_csv('data/upcoming_games.csv',index=None)
+
+    recent = recent[recent['pts'] == recent['pts']]
+    recent.to_csv('data/current_season.csv', index=None)
+
+def make_final_dataset():
+    recent = pd.read_csv('data/current_season.csv')
+    hist_data = pd.read_csv('data/historical_data.csv')
+    final = pd.concat([hist_data, recent])
+    final.to_csv('data/all_games.csv',index=None)
+
 
 if __name__=='__main__':
-    daily_nba_ref(dry_run=True)
+    #daily_nba_ref()
+    split_current()
+    make_final_dataset()

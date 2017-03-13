@@ -7,3 +7,12 @@ Raptors,TOR,49,Hawks,ATL,51,0,2017-03-10
 Nets,BKN,15,Mavericks,DAL,85,-10.5,2017-03-10
 Celtics,BOS,47,Nuggets,DEN,53,-1.0,2017-03-10
 Wizards,WSH,65,Kings,SAC,35,4.0,2017-03-10
+fran,fran_city,prob,opp,opp_city,opp_prob,sprd,date
+Bulls,CHI,26,Hornets,CHA,74,-6.5,2017-03-13
+Mavericks,DAL,29,Raptors,TOR,71,-5.5,2017-03-13
+Hawks,ATL,14,Spurs,SA,86,-11.0,2017-03-13
+Bucks,MIL,37,Grizzlies,MEM,63,-3.5,2017-03-13
+Wizards,WSH,46,Timberwolves,MIN,54,-1.0,2017-03-13
+Clippers,LAC,34,Jazz,UTA,66,-4.0,2017-03-13
+Lakers,LAL,12,Nuggets,DEN,88,-12.5,2017-03-13
+Magic,ORL,32,Kings,SAC,68,-4.5,2017-03-13
