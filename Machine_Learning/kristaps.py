@@ -29,15 +29,18 @@ class Kristaps(object):
         # Initialize score
         if not self.init:
             teams = np.unique(data['fran_id'])
-            self.elo_dict = dict(zip(teams, [1500] * len(teams)))
+            self.elo_dict = dict(zip(teams, [[1500] for _ in range(len(teams))]))
 
         data.sort_values('date', inplace=True)
+ 
         for i in range(len(data)):
             row = data.iloc[i]
-            RA = self.elo_dict[row['fran_id']]
-            RB = self.elo_dict[row['opp_fran']]
-            self.elo_dict[row['fran_id']], self.elo_dict[row['opp_fran']] = elo.update_elo_ratings(RA, RB, row['pts'] > row['opp_pts'],
-                                                                                     row['pts'] < row['opp_pts'])
+            RA = self.elo_dict[row['fran_id']][-1]
+            RB = self.elo_dict[row['opp_fran']][-1]
+            newRA, newRB = elo.update_elo_ratings(RA, RB, row['pts'] > row['opp_pts'], row['pts'] < row['opp_pts'])
+            self.elo_dict[row['fran_id']].append(newRA)
+            self.elo_dict[row['opp_fran']].append(newRB)
+
         if write == 1:
             pickle.dump(self.elo_dict, open('elo_dict.p', 'wb'))
 
