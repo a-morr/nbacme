@@ -215,9 +215,10 @@ class Kristaps(object):
         total_WL = {}
         for team in teams:
             total_WL[team] = team_WL_Predicted[team]+team_WL[team]
-        Projected_WL = pd.DataFrame({'fran_id':teams,'Projected W':[total_WL[team][0] for team in teams],'Projected L':[total_WL[team][1] for team in teams],'elo':[self.elo_dict[team][-1] for team in teams]})
-        table = Projected_WL.sort_values('elo',ascending=False)
-        table.to_csv('../data/ProjectedWL.csv',index = False)
+        Projected_WL = pd.DataFrame({'fran_id': teams, 'Projected W': [total_WL[team][0] for team in teams],
+                                     'Projected L': [total_WL[team][1] for team in teams], 'elo': [self.elo_dict[team][-1] for team in teams]})
+        table = Projected_WL.sort_values('elo', ascending=False)
+        table.to_csv('../data/ProjectedWL.csv', index=False)
         return table
 
     def compare_to_538(self):
@@ -241,14 +242,14 @@ class Kristaps(object):
 
         return newd
     
-    def plot_Elo(self, team_names,games = None,save = None):
+    def plot_Elo(self, team_names, games=None, filename=None):
         """ Plots the elo history of a team. x-axis will be the game number.
 
             :param team_names:  List of names of the teams to be plotted
             :param games:       If None then the entire history of the teams is plotted.
                                 Otherwise games will be the number of games plotted.
                                 Default is None.
-            :param save:        If True then the picture is saved as filename, otherwise it is
+            :param filename:    If not None then the picture is saved as filename, otherwise it is
                                 shown. Default is None.
             """
         for team_name in team_names:
@@ -256,9 +257,9 @@ class Kristaps(object):
                 elo_history = self.elo_dict[team_name]
             else:
                 elo_history = self.elo_dict[team_name][-games:]
-                plt.plot(elo_history,label = team_name)
+                plt.plot(elo_history, label=team_name)
         plt.legend()
-        if save != None:
-            plt.savefig(filename) 
+        if filename is not None:
+            plt.savefig(filename)
         else:
             plt.show()
