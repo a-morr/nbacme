@@ -240,22 +240,24 @@ class Kristaps(object):
 
         return newd
     
-    def plot_Elo(self, team_name,games = None,save = False):
+    def plot_Elo(self, team_names,games = None,save = None):
         """ Plots the elo history of a team. x-axis will be the game number.
 
-            :param team_name:   Name of the team to be plotted
-            :param games:       If None then the entire history of the team is plotted.
+            :param team_names:  List of names of the teams to be plotted
+            :param games:       If None then the entire history of the teams is plotted.
                                 Otherwise games will be the number of games plotted.
                                 Default is None.
-            :param save:        If True then the picture is saved otherwise, it is
-                                shown. Default is False.
+            :param save:        If True then the picture is saved as filename, otherwise it is
+                                shown. Default is None.
             """
-        if games == None:
-            elo_history = self.elo_dict[team_name]
-        else:
-            elo_history = self.elo_dict[team_name][-games:]
-        fig = plt.plot(elo_history)
-        if save:
-            plt.savefig(fig)
+        for team_name in team_names:
+            if games == None:
+                elo_history = self.elo_dict[team_name]
+            else:
+                elo_history = self.elo_dict[team_name][-games:]
+                plt.plot(elo_history,label = team_name)
+        plt.legend()
+        if save != None:
+            plt.savefig(filename) 
         else:
             plt.show()
