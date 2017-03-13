@@ -3,6 +3,8 @@ import numpy as np
 import pandas as pd
 import datetime as dt
 import pickle
+from matplotlib import pyplot as plt
+
 
 class Kristaps(object):
     """
@@ -237,3 +239,23 @@ class Kristaps(object):
         newd.columns = ['fran_id', 'opp_fran', 'Our prob', 'Our opp prob', '538 prob', '538 opp prob', '538 spread']
 
         return newd
+    
+    def plot_Elo(self, team_name,games = None,save = False):
+        """ Plots the elo history of a team. x-axis will be the game number.
+
+            :param team_name:   Name of the team to be plotted
+            :param games:       If None then the entire history of the team is plotted.
+                                Otherwise games will be the number of games plotted.
+                                Default is None.
+            :param save:        If True then the picture is saved otherwise, it is
+                                shown. Default is False.
+            """
+        if games == None:
+            elo_history = self.elo_dict[team_name]
+        else:
+            elo_history = self.elo_dict[team_name][-games:]
+        fig = plt.plot(elo_history)
+        if save:
+            plt.savefig(fig)
+        else:
+            plt.show()
