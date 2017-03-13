@@ -32,7 +32,8 @@ class Kristaps(object):
         if not self.init:
             teams = np.unique(data['fran_id'])
             self.elo_dict = dict(zip(teams, [[1500] for _ in range(len(teams))]))
-
+            
+        data['date'] = pd.to_datetime(data['date'])
         data.sort_values('date', inplace=True)
 
         for i in range(len(data)):
