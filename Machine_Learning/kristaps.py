@@ -32,7 +32,7 @@ class Kristaps(object):
             self.elo_dict = dict(zip(teams, [[1500] for _ in range(len(teams))]))
 
         data.sort_values('date', inplace=True)
- 
+
         for i in range(len(data)):
             row = data.iloc[i]
             RA = self.elo_dict[row['fran_id']][-1]
@@ -57,9 +57,11 @@ class Kristaps(object):
         df = df[(df['date'] == str(yesterday.date()))]
         for i in range(len(df)):
             row = df.iloc[i]
-            r_fran = self.elo_dict[row['fran_id']]
-            r_opp = self.elo_dict[row['opp_fran']]
-            self.elo_dict[row['fran_id']], self.elo_dict[row['opp_fran']] = elo.update_elo_ratings(r_fran, r_opp, row['pts'] > row['opp_pts'], row['pts'] < row['opp_pts'])
+            r_fran = self.elo_dict[row['fran_id']][-1]
+            r_opp = self.elo_dict[row['opp_fran']][-1]
+            newRA, newRB = elo.update_elo_ratings(r_fran, r_opp, row['pts'] > row['opp_pts'], row['pts'] < row['opp_pts'])
+            self.elo_dict[row['fran_id']].append(newRA)
+            self.elo_dict[row['opp_fran']].append(newRB)
 
         if write == 1:
             pickle.dump(self.elo_dict, open('elo_dict.p', 'wb'))
@@ -82,8 +84,8 @@ class Kristaps(object):
                 A = game['fran_id']
                 B = game['opp_fran']
 
-                rA = tmp_elo_dict[A]
-                rB = tmp_elo_dict[B]
+                rA = tmp_elo_dict[A][-1]
+                rB = tmp_elo_dict[B][-1]
 
                 pA, pB = elo.predict_score(rA, rB)
                 winner = np.random.choice([A, B], p=[pA, pB])
@@ -135,8 +137,8 @@ class Kristaps(object):
 
         preds = []
         for i in range(len(df)):
-            elo_A = self.elo_dict[df.iloc[i]['fran_id']]
-            elo_B = self.elo_dict[df.iloc[i]['opp_fran']]
+            elo_A = self.elo_dict[df.iloc[i]['fran_id']][-1]
+            elo_B = self.elo_dict[df.iloc[i]['opp_fran']][-1]
 
             sc = elo.predict_score(elo_A - 46, elo_B + 46)
             preds.append([df.iloc[i]['fran_id'], df.iloc[i]['opp_fran'], sc[0], sc[1]])
@@ -190,8 +192,8 @@ class Kristaps(object):
                 A = game['fran_id']
                 B = game['opp_fran']
             
-                rA = self.elo_dict[A]
-                rB = self.elo_dict[B]
+                rA = self.elo_dict[A][-1]
+                rB = self.elo_dict[B][-1]
             
                 pA, pB = elo.predict_score(rA, rB)
                 winner = np.random.choice([A, B], p=[pA, pB])
@@ -210,7 +212,7 @@ class Kristaps(object):
         total_WL = {}
         for team in teams:
             total_WL[team] = team_WL_Predicted[team]+team_WL[team]
-        Projected_WL = pd.DataFrame({'fran_id':teams,'Projected W':[total_WL[team][0] for team in teams],'Projected L':[total_WL[team][1] for team in teams],'elo':[self.elo_dict[team] for team in teams]})
+        Projected_WL = pd.DataFrame({'fran_id':teams,'Projected W':[total_WL[team][0] for team in teams],'Projected L':[total_WL[team][1] for team in teams],'elo':[self.elo_dict[team][-1] for team in teams]})
         table = Projected_WL.sort_values('elo',ascending=False)
         table.to_csv('../data/ProjectedWL.csv',index = False)
         return table
