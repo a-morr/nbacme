@@ -20,16 +20,20 @@ class Kristaps(object):
             self.elo_dict = dict()
 
 
-    def train_all(self, filename, write=1):
+    def train_all(self, data, write=1):
         """ Calculates the current Elo rating for each of the teams.
 
-        :param filename:  Name of csv file with data.  Columns include 'fran_id',
+        :param filename:  Name of csv file with data, or pandas dataframe.  Columns include 'fran_id',
                         'opp_fran', 'pts', and 'opp_pts'
         :return:        Update the self.elo_dict where the team names are the keys and the elo
                         ratings are the values.
         """
         # Initialize score
-        data = pd.read_csv(filename)
+        try:
+            # If data is filename, open it in pandas
+            data = pd.read_csv(data)
+        except:
+            pass
 
         if not self.init:
             teams = np.unique(data['fran_id'])
@@ -50,7 +54,7 @@ class Kristaps(object):
             pickle.dump(self.elo_dict, open('elo_dict.p', 'wb'))
 
 
-    def train_yesterday(self, filename='../data/historical_data.csv', write=1):
+    def train_yesterday(self, filename='data/historical_data.csv', write=1):
         """  Updates elo ratings based on results of yesterday's games.
 
         :param filename:
@@ -225,7 +229,8 @@ class Kristaps(object):
 
     def compare_to_538(self):
         """ Create chart showing our predictions and 538's predictions side by side.
-            Shows predictions from scrape_538() and from predict_today()
+            Shows predictions from scrape_538() and from predict_today(), which functions
+            are required to have been previously run.
 
         :return:
         """
