@@ -66,6 +66,6 @@ def make_final_dataset():
 
 
 if __name__=='__main__':
-    #daily_nba_ref()
+    daily_nba_ref()
     split_current()
     make_final_dataset()

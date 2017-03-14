@@ -20,15 +20,17 @@ class Kristaps(object):
             self.elo_dict = dict()
 
 
-    def train_all(self, data, write=1):
+    def train_all(self, filename, write=1):
         """ Calculates the current Elo rating for each of the teams.
 
-        :param data:    Pandas dataframe with each row being a game.  Columns include 'fran_id',
+        :param filename:  Name of csv file with data.  Columns include 'fran_id',
                         'opp_fran', 'pts', and 'opp_pts'
         :return:        Update the self.elo_dict where the team names are the keys and the elo
                         ratings are the values.
         """
         # Initialize score
+        data = pd.read_csv(filename)
+
         if not self.init:
             teams = np.unique(data['fran_id'])
             self.elo_dict = dict(zip(teams, [[1500] for _ in range(len(teams))]))
@@ -124,7 +126,7 @@ class Kristaps(object):
         return correct / len(Aprobs)
 
 
-    def predict_today(self, filename='../data/upcoming_games.csv', write=1):
+    def predict_today(self, filename='data/upcoming_games.csv', write=1):
         """  Predict today's games, as pulled from the upcoming_games file.
              Saves predictions to csv as today_predictions.csv for use on website.
 
@@ -150,13 +152,13 @@ class Kristaps(object):
         table[['opp_prob']] = np.rint(table[['opp_prob']] * 100).astype(np.int32)
         table[['prob']] = np.rint(table[['prob']] * 100).astype(np.int32)
         if write == 1:
-            table.to_csv('../data/today_predictions.csv', index=None)
+            table.to_csv('data/today_predictions.csv', index=None)
 
         return table
 
 
             
-    def current_WL(self, filename='../data/historical_data.csv'):
+    def current_WL(self, filename='data/historical_data.csv'):
         """ Count the current number of wins and losses for all teams in the 2016-2017 season.
             Returns a dictionary with the team names as the keys and [wins,losses] as the values.
 
@@ -176,7 +178,7 @@ class Kristaps(object):
             team_WL[team] = [won, lost]
         return team_WL
         
-    def simulate_seasons(self, filename='../data/upcoming_games.csv', n=100):
+    def simulate_seasons(self, filename='data/upcoming_games.csv', n=100):
         """ This simulates the rest of 2016-2017 season n times.  This function assumes
             that train has been run as it uses self.elo_dict.  Elo scores are not updated
             during the simulated season.  This will also calculate the current wins and 
@@ -218,7 +220,7 @@ class Kristaps(object):
         Projected_WL = pd.DataFrame({'fran_id': teams, 'Projected W': [total_WL[team][0] for team in teams],
                                      'Projected L': [total_WL[team][1] for team in teams], 'elo': [self.elo_dict[team][-1] for team in teams]})
         table = Projected_WL.sort_values('elo', ascending=False)
-        table.to_csv('../data/ProjectedWL.csv', index=False)
+        table.to_csv('data/ProjectedWL.csv', index=False)
         return table
 
     def compare_to_538(self):
@@ -227,8 +229,8 @@ class Kristaps(object):
 
         :return:
         """
-        us = pd.read_csv('../data/today_predictions.csv')
-        five38 = pd.read_csv('../data/pred_538.csv')
+        us = pd.read_csv('data/today_predictions.csv')
+        five38 = pd.read_csv('data/pred_538.csv')
         del five38['date']
         del five38['fran_city']
         del five38['opp_city']
@@ -240,6 +242,7 @@ class Kristaps(object):
         del newd['opp']
         newd.columns = ['fran_id', 'opp_fran', 'Our prob', 'Our opp prob', '538 prob', '538 opp prob', '538 spread']
 
+        newd.to_csv('data/daily_pred_comparison.csv', index=False)
         return newd
     
     def plot_Elo(self, team_names, games=None, filename=None):
