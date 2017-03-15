@@ -80,7 +80,7 @@ def get_daily_predictions():
                 [city_teams[x] for x in home_teams], home_teams, home_probabilities, home_spread, todays]
     together = np.array(together).T
 
-    with open('../data/pred_538.csv', 'a') as outcsv:
+    with open('data/pred_538.csv', 'a') as outcsv:
         writer = csv.writer(outcsv)
         writer.writerow(['fran', 'fran_city', 'prob', 'opp', 'opp_city', 'opp_prob', 'sprd', 'date'])
         for row in together:

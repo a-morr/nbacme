@@ -12,8 +12,9 @@ scrape_538.get_daily_predictions()
 
 # Training
 k = kristaps.Kristaps()
-k.train('../data/historical_data.csv')
+k.train_all('data/historical_data.csv')
 
 # Creates csv for website
-k.predict_today()       # This creates tomorrow.csv
+k.predict_today()       # This creates today_predictions.csv
 k.simulate_seasons()    # This creates ProjectedWL.csv
+k.compare_to_538()      # This creates daily_pred_comparison.csv

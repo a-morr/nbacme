@@ -4,6 +4,7 @@ import pandas as pd
 import datetime as dt
 import pickle
 from matplotlib import pyplot as plt
+from scipy.signal import savgol_filter
 
 
 class Kristaps(object):
@@ -23,12 +24,18 @@ class Kristaps(object):
     def train_all(self, data, write=1):
         """ Calculates the current Elo rating for each of the teams.
 
-        :param data:    Pandas dataframe with each row being a game.  Columns include 'fran_id',
+        :param filename:  Name of csv file with data, or pandas dataframe.  Columns include 'fran_id',
                         'opp_fran', 'pts', and 'opp_pts'
         :return:        Update the self.elo_dict where the team names are the keys and the elo
                         ratings are the values.
         """
         # Initialize score
+        try:
+            # If data is filename, open it in pandas
+            data = pd.read_csv(data)
+        except:
+            pass
+
         if not self.init:
             teams = np.unique(data['fran_id'])
             self.elo_dict = dict(zip(teams, [[1500] for _ in range(len(teams))]))
@@ -48,7 +55,7 @@ class Kristaps(object):
             pickle.dump(self.elo_dict, open('elo_dict.p', 'wb'))
 
 
-    def train_yesterday(self, filename='../data/historical_data.csv', write=1):
+    def train_yesterday(self, filename='data/historical_data.csv', write=1):
         """  Updates elo ratings based on results of yesterday's games.
 
         :param filename:
@@ -124,7 +131,7 @@ class Kristaps(object):
         return correct / len(Aprobs)
 
 
-    def predict_today(self, filename='../data/upcoming_games.csv', write=1):
+    def predict_today(self, filename='data/upcoming_games.csv', write=1):
         """  Predict today's games, as pulled from the upcoming_games file.
              Saves predictions to csv as today_predictions.csv for use on website.
 
@@ -150,13 +157,13 @@ class Kristaps(object):
         table[['opp_prob']] = np.rint(table[['opp_prob']] * 100).astype(np.int32)
         table[['prob']] = np.rint(table[['prob']] * 100).astype(np.int32)
         if write == 1:
-            table.to_csv('../data/today_predictions.csv', index=None)
+            table.to_csv('data/today_predictions.csv', index=None)
 
         return table
 
 
             
-    def current_WL(self, filename='../data/historical_data.csv'):
+    def current_WL(self, filename='data/historical_data.csv'):
         """ Count the current number of wins and losses for all teams in the 2016-2017 season.
             Returns a dictionary with the team names as the keys and [wins,losses] as the values.
 
@@ -176,7 +183,7 @@ class Kristaps(object):
             team_WL[team] = [won, lost]
         return team_WL
         
-    def simulate_seasons(self, filename='../data/upcoming_games.csv', n=100):
+    def simulate_seasons(self, filename='data/upcoming_games.csv', n=100):
         """ This simulates the rest of 2016-2017 season n times.  This function assumes
             that train has been run as it uses self.elo_dict.  Elo scores are not updated
             during the simulated season.  This will also calculate the current wins and 
@@ -215,19 +222,21 @@ class Kristaps(object):
         total_WL = {}
         for team in teams:
             total_WL[team] = team_WL_Predicted[team]+team_WL[team]
-        Projected_WL = pd.DataFrame({'fran_id':teams,'Projected W':[total_WL[team][0] for team in teams],'Projected L':[total_WL[team][1] for team in teams],'elo':[self.elo_dict[team][-1] for team in teams]})
-        table = Projected_WL.sort_values('elo',ascending=False)
-        table.to_csv('../data/ProjectedWL.csv',index = False)
+        Projected_WL = pd.DataFrame({'fran_id': teams, 'Projected W': [total_WL[team][0] for team in teams],
+                                     'Projected L': [total_WL[team][1] for team in teams], 'elo': [self.elo_dict[team][-1] for team in teams]})
+        table = Projected_WL.sort_values('elo', ascending=False)
+        table.to_csv('data/ProjectedWL.csv', index=False)
         return table
 
     def compare_to_538(self):
         """ Create chart showing our predictions and 538's predictions side by side.
-            Shows predictions from scrape_538() and from predict_today()
+            Shows predictions from scrape_538() and from predict_today(), which functions
+            are required to have been previously run.
 
         :return:
         """
-        us = pd.read_csv('../data/today_predictions.csv')
-        five38 = pd.read_csv('../data/pred_538.csv')
+        us = pd.read_csv('data/today_predictions.csv')
+        five38 = pd.read_csv('data/pred_538.csv')
         del five38['date']
         del five38['fran_city']
         del five38['opp_city']
@@ -239,26 +248,38 @@ class Kristaps(object):
         del newd['opp']
         newd.columns = ['fran_id', 'opp_fran', 'Our prob', 'Our opp prob', '538 prob', '538 opp prob', '538 spread']
 
+        newd.to_csv('data/daily_pred_comparison.csv', index=False)
         return newd
     
-    def plot_Elo(self, team_names,games = None,save = None):
+    def plot_Elo(self, team_names, games=None, filename=None, window=None, order=None, figsize=None, legend=None):
         """ Plots the elo history of a team. x-axis will be the game number.
 
             :param team_names:  List of names of the teams to be plotted
             :param games:       If None then the entire history of the teams is plotted.
                                 Otherwise games will be the number of games plotted.
                                 Default is None.
-            :param save:        If True then the picture is saved as filename, otherwise it is
+            :param filename:    If not None then the picture is saved as filename, otherwise it is
                                 shown. Default is None.
             """
+
+        if team_names is None:
+            team_names = self.elo_dict.keys()
+
+        fig, ax = plt.subplots(figsize=figsize)
+
         for team_name in team_names:
             if games == None:
                 elo_history = self.elo_dict[team_name]
             else:
                 elo_history = self.elo_dict[team_name][-games:]
-                plt.plot(elo_history,label = team_name)
-        plt.legend()
-        if save != None:
-            plt.savefig(filename) 
+                if window is not None:
+                    elo_history = savgol_filter(elo_history, window, order)
+                ax.plot(elo_history, label=team_name)
+        if legend is not None:
+            plt.legend(loc='center left', bbox_to_anchor=(1,.5))
+        else:
+            plt.legend()
+        if filename is not None:
+            plt.savefig(filename)
         else:
             plt.show()
