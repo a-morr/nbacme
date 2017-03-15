@@ -251,7 +251,7 @@ class Kristaps(object):
         newd.to_csv('data/daily_pred_comparison.csv', index=False)
         return newd
     
-    def plot_Elo(self, team_names, games=None, filename=None, window=None, order=None):
+    def plot_Elo(self, team_names, games=None, filename=None, window=None, order=None, figsize=None, legend=None):
         """ Plots the elo history of a team. x-axis will be the game number.
 
             :param team_names:  List of names of the teams to be plotted
@@ -261,6 +261,12 @@ class Kristaps(object):
             :param filename:    If not None then the picture is saved as filename, otherwise it is
                                 shown. Default is None.
             """
+
+        if team_names is None:
+            team_names = self.elo_dict.keys()
+
+        fig, ax = plt.subplots(figsize=figsize)
+
         for team_name in team_names:
             if games == None:
                 elo_history = self.elo_dict[team_name]
@@ -268,8 +274,11 @@ class Kristaps(object):
                 elo_history = self.elo_dict[team_name][-games:]
                 if window is not None:
                     elo_history = savgol_filter(elo_history, window, order)
-                plt.plot(elo_history, label=team_name)
-        plt.legend()
+                ax.plot(elo_history, label=team_name)
+        if legend is not None:
+            plt.legend(loc='center left', bbox_to_anchor=(1,.5))
+        else:
+            plt.legend()
         if filename is not None:
             plt.savefig(filename)
         else:
