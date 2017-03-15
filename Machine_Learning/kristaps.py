@@ -4,6 +4,7 @@ import pandas as pd
 import datetime as dt
 import pickle
 from matplotlib import pyplot as plt
+from scipy.signal import savgol_filter
 
 
 class Kristaps(object):
@@ -250,7 +251,7 @@ class Kristaps(object):
         newd.to_csv('data/daily_pred_comparison.csv', index=False)
         return newd
     
-    def plot_Elo(self, team_names, games=None, filename=None):
+    def plot_Elo(self, team_names, games=None, filename=None, window=None, order=None):
         """ Plots the elo history of a team. x-axis will be the game number.
 
             :param team_names:  List of names of the teams to be plotted
@@ -265,6 +266,8 @@ class Kristaps(object):
                 elo_history = self.elo_dict[team_name]
             else:
                 elo_history = self.elo_dict[team_name][-games:]
+                if window is not None:
+                    elo_history = savgol_filter(elo_history, window, order)
                 plt.plot(elo_history, label=team_name)
         plt.legend()
         if filename is not None:
