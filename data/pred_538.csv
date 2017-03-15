@@ -1,6 +1,11 @@
 fran,fran_city,prob,opp,opp_city,opp_prob,sprd,date
-Pistons,DET,27,Cavaliers,CLE,73,-6.0,2017-03-14
-Pacers,IND,49,Knicks,NY,51,-0.5,2017-03-14
-Thunder,OKC,68,Nets,BKN,32,4.5,2017-03-14
-Trailblazers,POR,47,Pelicans,NO,53,-1.0,2017-03-14
-Sixers,PHI,7,Warriors,GS,93,-16.0,2017-03-14
+Hornets,CHA,42,Pacers,IND,58,-2.0,2017-03-15
+Mavericks,DAL,22,Wizards,WSH,78,-7.5,2017-03-15
+Timberwolves,MIN,30,Celtics,BOS,70,-5.5,2017-03-15
+Pelicans,NO,20,Heat,MIA,80,-8.5,2017-03-15
+Jazz,UTA,56,Pistons,DET,44,1.5,2017-03-15
+Lakers,LAL,10,Rockets,HOU,90,-14.0,2017-03-15
+Grizzlies,MEM,41,Bulls,CHI,59,-2.0,2017-03-15
+Trailblazers,POR,10,Spurs,SA,90,-13.0,2017-03-15
+Kings,SAC,38,Suns,PHX,62,-3.0,2017-03-15
+Bucks,MIL,24,Clippers,LAC,76,-7.0,2017-03-15
