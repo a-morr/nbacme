@@ -64,7 +64,6 @@ def make_final_dataset():
     final = pd.concat([hist_data, recent])
     final.to_csv('data/all_games.csv',index=None)
 
-
 if __name__=='__main__':
     daily_nba_ref()
     split_current()
