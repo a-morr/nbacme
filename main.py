@@ -12,7 +12,7 @@ scrape_538.get_daily_predictions()
 
 # Training
 k = kristaps.Kristaps()
-k.train_all('data/historical_data.csv')
+k.train_all('data/all_games.csv')
 
 # Creates csv for website
 k.predict_today()       # This creates today_predictions.csv
