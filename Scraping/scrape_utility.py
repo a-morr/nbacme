@@ -10,7 +10,7 @@ def convert_name(name):
     teams = {"Warriors": "Warriors","Golden State": "Golden State Warriors","GSW": "Warriors","GS": "Warriors",
              "Spurs": "Spurs", "San Antonio": "Spurs", "San Antonio Spurs": "Spurs", "SA": "Spurs", "SAS": "Spurs",
              "Rockets": "Rockets", "Houston": "Rockets", "Houston Rockets": "Rockets", "HOU": "Rockets",
-             "Celtics": "Celitcs", "Boston": "Celitcs", "Boston Celtics": "Celitcs", "BOS": "Celitcs",
+             "Celtics": "Celtics", "Boston": "Celtics", "Boston Celtics": "Celtics", "BOS": "Celtics",
              "Wizards": "Wizards", "Washington DC": "Wizards", "Washington D.C.": "Wizards", "Washington Wizards": "Wizards", "WSH": "Wizards", "WAS": "Wizards",
              "Jazz": "Jazz", "Utah": "Jazz", "Utah Jazz": "Jazz", "UTA": "Jazz",
              "Cavaliers": "Cavaliers", "Cleveland": "Cavaliers", "Cleveland Cavaliers": "Cavaliers", "CLE": "Cavaliers",
