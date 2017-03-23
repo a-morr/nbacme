@@ -25,7 +25,7 @@ def add_elo_columns(df):
     :param df:  The dataframe to be added to
     """
     # Get elo dictionary
-    elodict = pickle.load(open('../elo_dict.p', 'rb'))
+    elodict = pickle.load(open('elo_dict.p', 'rb'))
 
     # Add columns to dataframe
     df['fran_elo'] = np.zeros(len(df))
@@ -63,6 +63,8 @@ if __name__ == "__main__":
     for col in colToAdd:
         RollingAvg(df,teams,col,5)
     
+    add_elo_columns(df)
+    
     # Save final dataframe
-    print df
+    df.to_csv('Algorithms_Data.csv')
     
