@@ -29,7 +29,7 @@ def convert_name(name):
              "Pistons": "Pistons", "Detroit": "Pistons", "Detroit Pistons": "Pistons", "DET": "Pistons",
              "Bulls": "Bulls", "Chicago": "Bulls", "Chicago Bulls": "Bulls", "CHI": "Bulls",
              "Hawks": "Hawks", "Atlanta": "Hawks", "Atlanta Hawks": "Hawks", "ATL": "Hawks",
-             "Pelicans": "Pelicans", "New Orleans": "Pelicans", "New Orleans Pelicans": "Pelicans", "NO": "Pelicans",
+             "Pelicans": "Pelicans", "New Orleans": "Pelicans", "New Orleans Pelicans": "Pelicans", "NO": "Pelicans", "NOP": "Pelicans",
              "Knicks": "Knicks", "NY": "Knicks", "NY Knicks": "Knicks", "New York Knicks": "Knicks", "NYN": "Knicks", "New York": "Knicks", "NYK": "Knicks",
              "Kings": "Kings", "Sacramento": "Kings", "Sacramento Kings": "Kings", "SAC": "Kings",
              "Suns": "Suns", "Phoenix": "Suns", "Phoenix Suns": "Suns", "PHX": "Suns", "PHO": "Suns",
