@@ -4,16 +4,40 @@ import pickle
 
 
 def RollingAvg(df,teams,column,window):
-    new_col = 'RollAvg_'+str(window)+'_'+column
-    df[new_col] = np.nan
+    new_colA = 'RollAvg_A_'+str(window)+'_'+column
+    new_colB = 'RollAvg_B_'+str(window)+'_'+column
+    new_col_oppA = 'RollAvg_A_'+str(window)+'_opp_'+column
+    new_col_oppB = 'RollAvg_B_'+str(window)+'_opp_'+column
+    
+    df[new_colA] = np.nan
+    df[new_colB] = np.nan
+    df[new_col_oppA] = np.nan
+    df[new_col_oppB] = np.nan
     for team in teams:
         fran_indices = df[(df['fran_id']==team)].index
-        fran_points = pd.rolling_mean(df[(df['fran_id']==team)][column],window)
-        df.ix[fran_indices,new_col] = fran_points.tolist()
-
-        fran_indices = df[(df['opp_fran']==team)].index
-        fran_points = pd.rolling_mean(df[(df['opp_fran']==team)][column],window)
-        df.ix[fran_indices,new_col] = fran_points.tolist()
+        opp_indices = df[(df['opp_fran']==team)].index
+        
+        fran_stats = df[(df['fran_id']==team)][column]
+        opp_stats = df[(df['opp_fran']==team)]['opp_'+column]
+        
+        stats = fran_stats.append(opp_stats)
+        stats.sort_index(inplace = True)
+        stats = pd.rolling_mean(stats,window)
+        
+        df.ix[fran_indices,new_colA] = stats[fran_indices].tolist()
+        df.ix[opp_indices,new_colB] = stats[opp_indices].tolist()
+        
+        fran_stats = df[(df['fran_id']==team)]['opp_'+column]
+        opp_stats = df[(df['opp_fran']==team)][column]
+        
+        stats = fran_stats.append(opp_stats)
+        stats.sort_index(inplace = True)
+        stats = pd.rolling_mean(stats,window)
+        
+        df.ix[fran_indices,new_col_oppA] = stats[fran_indices].tolist()
+        df.ix[opp_indices,new_col_oppB] = stats[opp_indices].tolist()
+        
+        
 
 
 def add_elo_columns(df):
@@ -50,6 +74,21 @@ def add_elo_columns(df):
         # Add this team's elo ratings to df
         df.ix[home_actual_inds, 'fran_elo'] = home_elos
         df.ix[away_actual_inds, 'opp_elo'] = away_elos
+    
+def days_between_games(df,teams):
+    df['Days_Since_Last'] = np.nan
+    for team in teams:
+        df['date'] = pd.to_datetime(df['date'])
+        
+        team_df = df[(df['fran_id']==team) | (df['opp_fran']==team)]
+        teamTime = (team_df['date'] - team_df['date'].shift(1))
+        days =  teamTime.iloc[1:].map(lambda x: x.days if x.days<=10 else 10)
+        
+        fran_indices = team_df.index[1:]
+        df.ix[fran_indices,'Days_Since_Last'] = days.tolist()
+
+def who_wins(df):
+    df['Win'] = df['pts']>df['opp_pts']
 
 
 if __name__ == "__main__":
@@ -58,13 +97,19 @@ if __name__ == "__main__":
     df = pd.read_csv(filename)
     teams = df['fran_id'].unique()
     
+    
     # Add new columns here
-    colToAdd = ['pts','opp_pts']
+    colToAdd = ['pts']
     for col in colToAdd:
         RollingAvg(df,teams,col,5)
     
     add_elo_columns(df)
     
+    days_between_games(df,teams)
+    who_wins(df)
+    
     # Save final dataframe
     df.to_csv('Algorithms_Data.csv')
+    #print df
+    
     
