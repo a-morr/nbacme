@@ -8,7 +8,8 @@ from scipy.signal import savgol_filter
 
 
 class Kristaps(object):
-    """
+    """ Used to store and calculate elo ratings, predict future wins and losses,
+        plot elo ratings, and compare out predictions to 538's predictions.
 
     """
 

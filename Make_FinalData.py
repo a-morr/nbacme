@@ -4,41 +4,55 @@ import pickle
 
 
 def RollingAvg(df,teams,column,window):
+    """ Calculates the rolling average of a column for both teams.
+    
+    :param df:  The dataframe to be added to
+    :param teams:  A list of all the teams
+    :param column:  Basketball statistic to average (i.e. points)
+    :param window:  Number of games to use for the average
+    """
+    
+    # Column names for new variables
     new_colA = 'RollAvg_A_'+str(window)+'_'+column
     new_colB = 'RollAvg_B_'+str(window)+'_'+column
     new_col_oppA = 'RollAvg_A_'+str(window)+'_opp_'+column
     new_col_oppB = 'RollAvg_B_'+str(window)+'_opp_'+column
     
+    # Default value is NAN
     df[new_colA] = np.nan
     df[new_colB] = np.nan
     df[new_col_oppA] = np.nan
     df[new_col_oppB] = np.nan
     for team in teams:
+        # Indices of the games for this team
         fran_indices = df[(df['fran_id']==team)].index
         opp_indices = df[(df['opp_fran']==team)].index
         
+        # Get the statistic that will be averaged
         fran_stats = df[(df['fran_id']==team)][column]
         opp_stats = df[(df['opp_fran']==team)]['opp_'+column]
         
+        # Order and calculate moving average
         stats = fran_stats.append(opp_stats)
         stats.sort_index(inplace = True)
         stats = pd.rolling_mean(stats,window)
         
+        # Add the information to the columns
         df.ix[fran_indices,new_colA] = stats[fran_indices].tolist()
         df.ix[opp_indices,new_colB] = stats[opp_indices].tolist()
         
+        # Get the statistic that will be averaged for the opposing team
         fran_stats = df[(df['fran_id']==team)]['opp_'+column]
         opp_stats = df[(df['opp_fran']==team)][column]
         
+        # Order and calculate moving average for the opposing team
         stats = fran_stats.append(opp_stats)
         stats.sort_index(inplace = True)
         stats = pd.rolling_mean(stats,window)
         
+        # Add the information to the columns
         df.ix[fran_indices,new_col_oppA] = stats[fran_indices].tolist()
         df.ix[opp_indices,new_col_oppB] = stats[opp_indices].tolist()
-        
-        
-
 
 def add_elo_columns(df):
     """ Add columns to dataframe, containing the elo ratings of the home team
@@ -76,6 +90,12 @@ def add_elo_columns(df):
         df.ix[away_actual_inds, 'opp_elo'] = away_elos
     
 def days_between_games(df,teams):
+    """ Adds the days since the last game for each team used to measure
+        fatigue of players.
+    
+    :param df:  The dataframe to be added to
+    :param teams:  A list of all the teams
+    """
     df['Days_Since_Last'] = np.nan
     for team in teams:
         df['date'] = pd.to_datetime(df['date'])
@@ -88,6 +108,11 @@ def days_between_games(df,teams):
         df.ix[fran_indices,'Days_Since_Last'] = days.tolist()
 
 def who_wins(df):
+    """ Adds the Win column. If Win is true then team A (away team) won
+        the game.
+    
+    :param df:  The dataframe to be added to
+    """
     df['Win'] = df['pts']>df['opp_pts']
 
 
@@ -111,5 +136,3 @@ if __name__ == "__main__":
     # Save final dataframe
     df.to_csv('Algorithms_Data.csv')
     #print df
-    
-    
