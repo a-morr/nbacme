@@ -12,13 +12,13 @@ def get_stats():
     """
     stem = 'http://www.basketball-reference.com'
     seasonstem = stem + '/leagues/NBA_'
-    years = range(2015,2000,-1)
+    years = range(2017,2015,-1)
     months = ['october','november','december','january','february','march','april','may','june']
 
     with open('data/hist_stats.csv','w') as outfile:
         out = csv.writer(outfile)
         out.writerow(['date','away','home','amp','afg','afga','afg_pct','afg3','afg3a','afg3_pct','aft','afta','aft_pct','aord','adrb','atrb','aast','astl','ablk','atov','apf','apts',
-                                           'hmp','hfg','hfga','hfg_pct','hfg3','hfg3a','fhg3_pct','hft','hfta','hft_pct','hord','hdrb','htrb','hast','hstl','hblk','htov','hpf','hpts'])
+                                           'hmp','hfg','hfga','hfg_pct','hfg3','hfg3a','hfg3_pct','hft','hfta','hft_pct','hord','hdrb','htrb','hast','hstl','hblk','htov','hpf','hpts'])
         for year in years:
             for month in months:
                 try:
